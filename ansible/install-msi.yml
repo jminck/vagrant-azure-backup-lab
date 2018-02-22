@@ -1,0 +1,18 @@
+- name: Install Winzip from an MSI
+  hosts: all
+
+  tasks:
+    - name: Create c:\Downloads directory
+      win_file: 
+        path: C:\Downloads 
+        state: directory
+
+    - name: Download the Winzip installer
+      win_get_url:
+        url: 'http://download.winzip.com/winzip215-64.msi'
+        dest: 'C:\Downloads\winzip215-64.msi'
+
+    - name: Install MSI
+      win_msi:
+        path: 'C:\Downloads\winzip215-64.msi'
+        state: present
