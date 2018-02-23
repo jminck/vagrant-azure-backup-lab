@@ -1,4 +1,4 @@
-# vagrant-ansible-windows-lab
+# vagrant-azure-backup-lab
 
 From control machine, to verify WinRM from linux to Windows machines:
 
@@ -9,4 +9,4 @@ From control machine, to verify WinRM from linux to Windows machines:
 To test a playbook against the windows clients:
 
  *   ansible-playbook -l windows install-msi.yml
-# vagrant-azure-backup-lab
+

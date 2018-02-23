@@ -66,9 +66,9 @@ EOF
     end
   end
 
-  config.vm.define "lb01" do |h|
+  config.vm.define "backup01" do |h|
     h.vm.box = "mwrock/Windows2012R2"
-    h.vm.hostname = "lb01"
+    h.vm.hostname = "backup01"
     h.vm.network "private_network", ip: "192.168.136.101"
     h.vm.guest = :windows
     h.vm.communicator = "winrm"
@@ -83,11 +83,12 @@ EOF
     h.vm.provision "shell", path: "scripts/windows/install-sshd.ps1", powershell_elevated_interactive: false 
     h.vm.provision :reload 
     h.vm.provision "shell", path: "scripts/windows/ConfigureRemotingForAnsible.ps1", powershell_elevated_interactive: false 
+    h.vm.provision "shell", path: "scripts/windows/ConfigBackupServer.cmd"
 
     h.vm.provider "virtualbox" do |vm|
         vm.gui = false
         vm.cpus = 2
-        vm.memory = 2048
+        vm.memory = 4096
     end
   end
 
@@ -116,9 +117,9 @@ EOF
     end
   end
 
-  config.vm.define "app02" do |h|
+  config.vm.define "config01" do |h|
     h.vm.box = "mwrock/Windows2012R2"
-    h.vm.hostname = "app02"
+    h.vm.hostname = "config01"
     h.vm.network "private_network", ip: "192.168.136.112"
     h.vm.guest = :windows
     h.vm.communicator = "winrm"
