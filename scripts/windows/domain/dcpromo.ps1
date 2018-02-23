@@ -6,7 +6,7 @@ $SafeModeAdministratorPassword = ConvertTo-SecureString "P@ssW0rD1!" -AsPlainTex
 Import-Module ADDSDeployment
 
 #check if domain is already setup before trying to create forest
-$dc = Import-Module ADDSDeployment
+$dc = Get-ADDomainController
 
 if ($dc -eq $null) {
     Install-ADDSForest `
