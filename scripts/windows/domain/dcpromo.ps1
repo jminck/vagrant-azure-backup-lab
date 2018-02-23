@@ -4,17 +4,23 @@ $SafeModeAdministratorPassword = ConvertTo-SecureString "P@ssW0rD1!" -AsPlainTex
 # Windows PowerShell script for AD DS Deployment
 #
 Import-Module ADDSDeployment
-Install-ADDSForest `
--DatabasePath "C:\Windows\NTDS" `
--DomainMode "Win2012" `
--DomainName "mytest.local" `
--DomainNetbiosName "MYTEST" `
--ForestMode "Win2012" `
--InstallDns:$true `
--LogPath "C:\Windows\NTDS" `
--NoRebootOnCompletion:$true `
--SysvolPath "C:\Windows\SYSVOL" `
--Force:$true `
--SafeModeAdministratorPassword $SafeModeAdministratorPassword
 
-Start-Sleep 120
+#check if domain is already setup before trying to create forest
+$dc = Import-Module ADDSDeployment
+
+if ($dc -eq $null) {
+    Install-ADDSForest `
+    -DatabasePath "C:\Windows\NTDS" `
+    -DomainMode "Win2012" `
+    -DomainName "mytest.local" `
+    -DomainNetbiosName "MYTEST" `
+    -ForestMode "Win2012" `
+    -InstallDns:$true `
+    -LogPath "C:\Windows\NTDS" `
+    -NoRebootOnCompletion:$true `
+    -SysvolPath "C:\Windows\SYSVOL" `
+    -Force:$true `
+    -SafeModeAdministratorPassword $SafeModeAdministratorPassword
+
+    Start-Sleep 120
+}
