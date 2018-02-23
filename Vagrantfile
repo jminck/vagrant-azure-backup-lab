@@ -93,6 +93,33 @@ EOF
     end
   end
 
+  
+  config.vm.define "backup02" do |h|
+    h.vm.box = "opentable/win-2012-standard-amd64-nocm"
+    h.vm.hostname = "backup02"
+    h.vm.network "private_network", ip: "192.168.136.102"
+    h.vm.guest = :windows
+    h.vm.communicator = "winrm"
+    h.vm.boot_timeout = 600
+    h.vm.graceful_halt_timeout = 600
+
+    h.vm.network :forwarded_port, guest: 5985, host: 5985, id: "winrm", auto_correct: true
+    
+    h.vm.provision "shell", path: "scripts/windows/domain/joindomain.ps1", powershell_elevated_interactive: false 
+    h.vm.provision "shell", inline: "slmgr /rearm"
+    h.vm.provision :reload 
+    h.vm.provision "shell", path: "scripts/windows/install-sshd.ps1", powershell_elevated_interactive: false 
+    h.vm.provision :reload 
+    h.vm.provision "shell", path: "scripts/windows/ConfigureRemotingForAnsible.ps1", powershell_elevated_interactive: false 
+    #h.vm.provision "shell", path: "scripts/windows/ConfigBackupServer.cmd"
+
+    h.vm.provider "virtualbox" do |vm|
+        vm.gui = false
+        vm.cpus = 2
+        vm.memory = 4096
+    end
+  end
+
   config.vm.define "app01" do |h|
     h.vm.box = "mwrock/Windows2012R2"
     h.vm.hostname = "app01"

@@ -9,6 +9,7 @@ Import-Module ADDSDeployment
 $dc = Get-ADDomainController
 
 if ($dc -eq $null) {
+    
     Install-ADDSForest `
     -DatabasePath "C:\Windows\NTDS" `
     -DomainMode "Win2012" `
