@@ -1,4 +1,4 @@
-Set-DNSClientServerAddress -InterfaceAlias "Ethernet 2" -ServerAddresses ("192.168.136.11")
+Set-DNSClientServerAddress -InterfaceAlias "Ethernet 2" -ServerAddresses ("192.168.1.150")
 
 $domain = "mytest"
 $password = "vagrant" | ConvertTo-SecureString -asPlainText -Force

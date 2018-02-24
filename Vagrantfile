@@ -17,7 +17,7 @@ Vagrant.configure(2) do |config|
 
   config.vm.define "control", primary: true do |h|
     h.vm.hostname =  "control"
-    h.vm.network "private_network", ip: "192.168.136.10"
+    h.vm.network "public_network", bridge: "en1"
     h.vm.provision :shell, inline: 'echo demo > /home/vagrant/.vault_pass.txt'
     h.vm.provision "shell" do |provision|
       provision.path = "scripts/linux/provision_ansible.sh"
@@ -42,7 +42,7 @@ EOF
   config.vm.define "dc01" do |h|
     h.vm.box = "mwrock/Windows2012R2"
     h.vm.hostname = "dc01"
-    h.vm.network "private_network", ip: "192.168.136.11"
+    h.vm.network "public_network", ip: "192.168.1.150", bridge: "en1, use_dhcp_assigned_default_route: true
     h.vm.guest = :windows
     h.vm.communicator = "winrm"
     h.vm.boot_timeout = 600
@@ -70,7 +70,7 @@ EOF
   config.vm.define "backup01" do |h|
     h.vm.box = "mwrock/Windows2012R2"
     h.vm.hostname = "backup01"
-    h.vm.network "private_network", ip: "192.168.136.101"
+    h.vm.network "public_network", bridge: "en1"
     h.vm.guest = :windows
     h.vm.communicator = "winrm"
     h.vm.boot_timeout = 600
@@ -97,7 +97,7 @@ EOF
   config.vm.define "backup02" do |h|
     h.vm.box = "opentable/win-2012-standard-amd64-nocm"
     h.vm.hostname = "backup02"
-    h.vm.network "private_network", ip: "192.168.136.102"
+    h.vm.network "public_network", bridge: "en1"
     h.vm.guest = :windows
     h.vm.communicator = "winrm"
     h.vm.boot_timeout = 600
@@ -131,7 +131,7 @@ EOF
   config.vm.define "app01" do |h|
     h.vm.box = "mwrock/Windows2012R2"
     h.vm.hostname = "app01"
-    h.vm.network "private_network", ip: "192.168.136.111"
+    h.vm.network "public_network", bridge: "en1"
     h.vm.guest = :windows
     h.vm.communicator = "winrm"
     h.vm.boot_timeout = 600
@@ -156,7 +156,7 @@ EOF
   config.vm.define "config01" do |h|
     h.vm.box = "mwrock/Windows2012R2"
     h.vm.hostname = "config01"
-    h.vm.network "private_network", ip: "192.168.136.112"
+    h.vm.network "public_network", bridge: "en1"
     h.vm.guest = :windows
     h.vm.communicator = "winrm"
     h.vm.boot_timeout = 600
@@ -181,7 +181,7 @@ EOF
   config.vm.define "db01" do |h|
     h.vm.box = "mwrock/Windows2012R2"
     h.vm.hostname = "db01"
-    h.vm.network "private_network", ip: "192.168.136.121"
+    h.vm.network "public_network", bridge: "en1"
     h.vm.guest = :windows
     h.vm.communicator = "winrm"
     h.vm.boot_timeout = 600
