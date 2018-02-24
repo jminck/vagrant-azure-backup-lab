@@ -42,7 +42,7 @@ EOF
   config.vm.define "dc01" do |h|
     h.vm.box = "mwrock/Windows2012R2"
     h.vm.hostname = "dc01"
-    h.vm.network "public_network", ip: "192.168.1.150", bridge: "en1, use_dhcp_assigned_default_route: true
+    h.vm.network "public_network", ip: "192.168.1.150", bridge: "en1", use_dhcp_assigned_default_route: true
     h.vm.guest = :windows
     h.vm.communicator = "winrm"
     h.vm.boot_timeout = 600
