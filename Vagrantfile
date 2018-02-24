@@ -53,8 +53,7 @@ EOF
     h.vm.provision "shell", path: "scripts/windows/domain/installAD.ps1", powershell_elevated_interactive: false 
     h.vm.provision :reload 
     h.vm.provision "shell", path: "scripts/windows/domain/dcpromo.ps1", powershell_elevated_interactive: false 
-    h.vm.provision :halt
-    h.vm.provision :up 
+    h.vm.provision :reload
     h.vm.provision "shell", inline: "slmgr /rearm"    
     h.vm.provision "shell", path: "scripts/windows/install-general.ps1", powershell_elevated_interactive: false 
     h.vm.provision :reload 
