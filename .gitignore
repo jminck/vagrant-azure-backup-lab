@@ -1,2 +1,7 @@
 .vagrant/*
 download/*
+*.pub
+cred.txt
+*.exe
+*.VaultCredentials
+*.vdi

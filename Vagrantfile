@@ -53,7 +53,7 @@ EOF
     h.vm.provision "shell", path: "scripts/windows/domain/installAD.ps1", powershell_elevated_interactive: false 
     h.vm.provision :reload 
     h.vm.provision "shell", path: "scripts/windows/domain/dcpromo.ps1", powershell_elevated_interactive: false 
-    h.vm.provision :halt --force
+    h.vm.provision :halt
     h.vm.provision :up 
     h.vm.provision "shell", inline: "slmgr /rearm"    
     h.vm.provision "shell", path: "scripts/windows/install-sshd.ps1", powershell_elevated_interactive: false 
@@ -103,8 +103,16 @@ EOF
     h.vm.boot_timeout = 600
     h.vm.graceful_halt_timeout = 600
 
+    h.vm.provider "virtualbox" do |vb|
+      file_to_disk = 'large_disk.vdi'
+      unless File.exist?(file_to_disk)
+        vb.customize ['createhd', '--filename', file_to_disk, '--size', 500 * 1024]
+      end
+      vb.customize ['storageattach', :id, '--storagectl', 'IDE Controller', '--port', 0, '--device', 1, '--type', 'hdd', '--medium', file_to_disk]
+   end
+
     h.vm.network :forwarded_port, guest: 5985, host: 5985, id: "winrm", auto_correct: true
-    
+    h.vm.network :forwarded_port, guest: 3389, host: 3389, id: "rdp", auto_correct: true 
     h.vm.provision "shell", path: "scripts/windows/domain/joindomain.ps1", powershell_elevated_interactive: false 
     h.vm.provision "shell", inline: "slmgr /rearm"
     h.vm.provision :reload 
