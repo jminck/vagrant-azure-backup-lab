@@ -24,4 +24,8 @@ if ($dc -eq $null) {
     -SafeModeAdministratorPassword $SafeModeAdministratorPassword
 
     Start-Sleep 120
+
+    Add-DnsServerForwarder -IPAddress 8.8.8.8 -PassThru
+    Add-DnsServerForwarder -IPAddress 4.2.2.1 -PassThru
+
 }

@@ -40,9 +40,20 @@ EOF
   end
 
   config.vm.define "dc01" do |h|
+    # use the plaintext WinRM transport and force it to use basic authentication.
+    # NB this is needed because the default negotiate transport stops working
+    #    after the domain controller is installed.
+    #    see https://groups.google.com/forum/#!topic/vagrant-up/sZantuCM0q4
+
+    # commented out because base image doesn't have this enabled - it is in install-genera
+    # h.winrm.transport = :plaintext
+    # h.winrm.basic_auth_only = true
+
     h.vm.box = "mwrock/Windows2012R2"
     h.vm.hostname = "dc01"
-    h.vm.network "public_network", ip: "192.168.1.150", bridge: "em1", use_dhcp_assigned_default_route: true
+    # note this IP address is used in another script by domain members to set DNS: scripts\windows\domain\joindomain.ps1
+    h.vm.network "public_network", ip: "192.168.1.150", bridge: "em1"
+    h.vm.provision "shell",   run: "always",  inline: route add 0.0.0.0 MASK 0.0.0.0  192.168.1.254 -p"
     h.vm.guest = :windows
     h.vm.communicator = "winrm"
     h.vm.boot_timeout = 600

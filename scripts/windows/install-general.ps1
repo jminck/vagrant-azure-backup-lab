@@ -5,7 +5,7 @@ choco install git -y
 choco install bginfo -y
 robocopy . C:\ProgramData\chocolatey\bin bginfo.bgi
 New-PSDrive -PSProvider Registry -Name HKU -Root HKEY_USERS
-Set-ItemProperty "HKU:\Software\Microsoft\Windows\CurrentVersion\Run" -Name 'BGInfo' -Value "bginfo.exe C:\ProgramData\chocolatey\bin\bginfo.bgi /timer:0 /nolicprompt /silent"
+Set-ItemProperty "HKU:\.Default\Software\Microsoft\Windows\CurrentVersion\Run" -Name 'BGInfo' -Value "bginfo.exe C:\ProgramData\chocolatey\bin\bginfo.bgi /timer:0 /nolicprompt /silent"
 Set-ItemProperty "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run" -Name 'BGInfo' -Value "bginfo.exe C:\ProgramData\chocolatey\bin\bginfo.bgi /timer:0 /nolicprompt /silent"
 bginfo.exe C:\ProgramData\chocolatey\bin\bginfo.bgi /timer:0 /nolicprompt /silent
 
