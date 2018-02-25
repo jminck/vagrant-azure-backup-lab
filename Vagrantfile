@@ -11,7 +11,7 @@
 # This should put you at the control host
 #  with access, by name, to other vms
 Vagrant.configure(2) do |config|
-  config.hostmanager.enabled = true
+  config.hostmanager.enabled = false
 
   config.vm.box = "ubuntu/trusty64"
 
@@ -25,6 +25,29 @@ Vagrant.configure(2) do |config|
     h.vm.provision :shell, :inline => <<'EOF'
 
 	if [ ! -f "/home/vagrant/.ssh/id_rsa" ]; then
+  ssh-keygen -t rsa -N "" -f /home/vagrant/.ssh/id_rsa
+fi
+cp /home/vagrant/.ssh/id_rsa.pub /vagrant/control.pub
+
+cat << 'SSHEOF' > /home/vagrant/.ssh/config
+Host *
+  StrictHostKeyChecking no
+  UserKnownHostsFile=/dev/null
+SSHEOF
+
+chown -R vagrant:vagrant /home/vagrant/.ssh/
+EOF
+  end
+
+
+  config.vm.define "control2", primary: true do |h|
+    h.vm.box = "geerlingguy/ubuntu1404"
+    h.vm.hostname =  "control2"
+    h.vm.network "public_network", bridge: "em1"
+    h.vm.provision :shell, inline: 'echo demo > /home/vagrant/.vault_pass.txt'
+    h.vm.provision :shell, :inline => <<'EOF'
+
+        if [ ! -f "/home/vagrant/.ssh/id_rsa" ]; then
   ssh-keygen -t rsa -N "" -f /home/vagrant/.ssh/id_rsa
 fi
 cp /home/vagrant/.ssh/id_rsa.pub /vagrant/control.pub
@@ -53,7 +76,7 @@ EOF
     h.vm.hostname = "dc01"
     # note this IP address is used in another script by domain members to set DNS: scripts\windows\domain\joindomain.ps1
     h.vm.network "public_network", ip: "192.168.1.150", bridge: "em1"
-    h.vm.provision "shell",   run: "always",  inline: route add 0.0.0.0 MASK 0.0.0.0  192.168.1.254 -p"
+    h.vm.provision "shell",   run: "always",  inline: "route add 0.0.0.0 MASK 0.0.0.0  192.168.1.254 -p"
     h.vm.guest = :windows
     h.vm.communicator = "winrm"
     h.vm.boot_timeout = 600
@@ -114,7 +137,7 @@ EOF
     h.vm.graceful_halt_timeout = 600
 
     h.vm.provider "virtualbox" do |vb|
-      file_to_disk = 'large_disk.vdi'
+      file_to_disk = '/mnt/vms/large_disk.vdi'
       unless File.exist?(file_to_disk)
         vb.customize ['createhd', '--filename', file_to_disk, '--size', 500 * 1024]
       end
