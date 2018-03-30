@@ -18,6 +18,7 @@ Vagrant.configure(2) do |config|
   config.vm.define "control", primary: true do |h|
     h.vm.hostname =  "control"
     h.vm.network "public_network", bridge: "em1"
+    h.vm.provision :shell, inline: 'sudo sed \'s/PermitRootLogin without-password/PermitRootLogin yes/g\' /etc/ssh/sshd_config > /etc/ssh/sshd_config'
     h.vm.provision :shell, inline: 'echo demo > /home/vagrant/.vault_pass.txt'
     h.vm.provision "shell" do |provision|
       provision.path = "scripts/linux/provision_ansible.sh"
@@ -39,11 +40,13 @@ chown -R vagrant:vagrant /home/vagrant/.ssh/
 EOF
   end
 
+  
 
   config.vm.define "control2", primary: true do |h|
     h.vm.box = "geerlingguy/ubuntu1404"
     h.vm.hostname =  "control2"
     h.vm.network "public_network", bridge: "em1"
+    h.vm.provision :shell, inline: 'sudo sed \'s/PermitRootLogin without-password/PermitRootLogin yes/g\' /etc/ssh/sshd_config > /etc/ssh/sshd_config'
     h.vm.provision :shell, inline: 'echo demo > /home/vagrant/.vault_pass.txt'
     h.vm.provision :shell, :inline => <<'EOF'
 
@@ -101,7 +104,7 @@ EOF
   end
 
   config.vm.define "backup01" do |h|
-    h.vm.box = "mwrock/Windows2012R2"
+    h.vm.box = "mwrock/Windows2016"
     h.vm.hostname = "backup01"
     h.vm.network "public_network", bridge: "em1"
     h.vm.guest = :windows
