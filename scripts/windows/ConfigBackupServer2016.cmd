@@ -21,10 +21,14 @@ if not exist dotnetfx35.exe C:\ProgramData\chocolatey\lib\wget\tools\wget.exe ht
 :: .net 4.6.2
 if not exist NDP462-KB3151800-x86-x64-AllOS-ENU.exe C:\ProgramData\chocolatey\lib\wget\tools\wget.exe https://download.microsoft.com/download/F/9/4/F942F07D-F26F-4F30-B4E3-EBD54FABA377/NDP462-KB3151800-x86-x64-AllOS-ENU.exe
 
+:: server 2012 commands
 powershell -command install-windowsfeature NET-Framework-Features -IncludeAllSubFeature
 powershell -command install-windowsfeature Hyper-V-PowerShell
 powershell -command Enable-WindowsOptionalFeature –Online -FeatureName Microsoft-Hyper-V –All -NoRestart
 powershell -command Install-WindowsFeature RSAT-Hyper-V-Tools -IncludeAllSubFeature
+
+:: server 2016 commands
+start /wait dism.exe /Online /Enable-feature /All /FeatureName:Microsoft-Hyper-V /FeatureName:Microsoft-Hyper-V-Management-PowerShell /quiet /norestart
 
 :: site recovery config server installer
 C:\ProgramData\chocolatey\lib\wget\tools\wget.exe http://aka.ms/unifiedinstaller_wus
