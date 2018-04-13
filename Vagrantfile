@@ -11,7 +11,6 @@
 # This should put you at the control host
 #  with access, by name, to other vms
 Vagrant.configure(2) do |config|
-  config.hostmanager.enabled = false
 
   config.vm.box = "ubuntu/trusty64"
 
@@ -120,7 +119,7 @@ EOF
     h.vm.provision "shell", path: "scripts/windows/install-general.ps1", powershell_elevated_interactive: false 
     h.vm.provision :reload 
     h.vm.provision "shell", path: "scripts/windows/ConfigureRemotingForAnsible.ps1", powershell_elevated_interactive: false 
-    h.vm.provision "shell", path: "scripts/windows/ConfigBackupServer.cmd"
+    h.vm.provision "shell", path: "scripts/windows/ConfigBackupServer2016.cmd"
 
     h.vm.provider "virtualbox" do |vm|
         vm.gui = false
@@ -141,7 +140,7 @@ EOF
 
     h.vm.provider "virtualbox" do |vb|
       file_to_disk = '/mnt/vms/large_disk.vdi'
-      unless File.exist?(file_to_disk)
+      unless File.exists?(file_to_disk)
         vb.customize ['createhd', '--filename', file_to_disk, '--size', 500 * 1024]
       end
       vb.customize ['storageattach', :id, '--storagectl', 'IDE Controller', '--port', 0, '--device', 1, '--type', 'hdd', '--medium', file_to_disk]
@@ -155,7 +154,7 @@ EOF
     h.vm.provision "shell", path: "scripts/windows/install-general.ps1", powershell_elevated_interactive: false 
     h.vm.provision :reload 
     h.vm.provision "shell", path: "scripts/windows/ConfigureRemotingForAnsible.ps1", powershell_elevated_interactive: false 
-    #h.vm.provision "shell", path: "scripts/windows/ConfigBackupServer.cmd"
+    h.vm.provision "shell", path: "scripts/windows/ConfigBackupServer2012.cmd"
 
     h.vm.provider "virtualbox" do |vm|
         vm.gui = false

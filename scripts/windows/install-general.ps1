@@ -13,3 +13,9 @@ bginfo.exe C:\ProgramData\chocolatey\bin\bginfo.bgi /timer:0 /nolicprompt /silen
 # needs a bunch of ports open https://technet.microsoft.com/en-us/library/hh758204(v=sc.12).aspx
 netsh advfirewall firewall add rule name="Allow DPM Remote Agent Push" dir=in action=allow service=any enable=yes profile=any remoteip=192.168.1.101
 netsh advfirewall firewall add rule name="Allow DPM Remote Agent Push" dir=in action=allow service=any enable=yes profile=any remoteip=192.168.1.102
+
+#open RDP port
+netsh advfirewall firewall add rule name="Remote Desktop - User Mode (TCP-In)" dir=in action=allow service="TermService" description="Inbound rule for the Remote Desktop service to allow RDP traffic. [TCP 3389]" enable=yes profile=private,domain localport=3389 protocol=tcp
+netsh advfirewall firewall add rule name="Remote Desktop - User Mode (UDP-In)" dir=in action=allow service="TermService" description="Inbound rule for the Remote Desktop service to allow RDP traffic. [UDP 3389]" enable=yes profile=private,domain localport=3389 protocol=udp
+#disable NLA for RDP
+(Get-WmiObject -class Win32_TSGeneralSetting -Namespace root\cimv2\terminalservices -ComputerName $env:ComputerName -Filter "TerminalName='RDP-tcp'").SetUserAuthenticationRequired(0)
