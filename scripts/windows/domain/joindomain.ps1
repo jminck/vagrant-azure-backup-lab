@@ -1,4 +1,4 @@
-Set-DNSClientServerAddress -InterfaceAlias "Ethernet 2" -ServerAddresses ("192.168.1.150")
+Set-DNSClientServerAddress -InterfaceAlias "Ethernet" -ServerAddresses ("192.168.1.150")
 
 # disable IPV6 
 $ipV6 = get-netadapterbinding | where-object {$_.componentID -eq "ms_tcpip6"}

@@ -12,11 +12,13 @@
 #  with access, by name, to other vms
 Vagrant.configure(2) do |config|
 
-  config.vm.box = "ubuntu/trusty64"
-
+  config.vm.box = "hashicorp/precise64"
+  config.vm.synced_folder '.', '/vagrant', type: 'smb', smb_username:  "vagrant", smb_password: "vagrant"
+  
+  
   config.vm.define "control", primary: true do |h|
     h.vm.hostname =  "control"
-    h.vm.network "public_network", bridge: "em1"
+    h.vm.network "public_network"
     h.vm.provision :shell, inline: 'sudo sed \'s/PermitRootLogin without-password/PermitRootLogin yes/g\' /etc/ssh/sshd_config > /etc/ssh/sshd_config'
     h.vm.provision :shell, inline: 'echo demo > /home/vagrant/.vault_pass.txt'
     h.vm.provision "shell" do |provision|
@@ -37,14 +39,20 @@ SSHEOF
 
 chown -R vagrant:vagrant /home/vagrant/.ssh/
 EOF
+
+    h.vm.provider "hyperv" do |vm|
+		vm.vmname = "control"
+        vm.cpus = 2
+        vm.memory = 2048
+    end
   end
 
   
 
   config.vm.define "control2", primary: true do |h|
-    h.vm.box = "geerlingguy/ubuntu1404"
+    h.vm.box = "hashicorp/precise64"
     h.vm.hostname =  "control2"
-    h.vm.network "public_network", bridge: "em1"
+    h.vm.network "public_network"
     h.vm.provision :shell, inline: 'sudo sed \'s/PermitRootLogin without-password/PermitRootLogin yes/g\' /etc/ssh/sshd_config > /etc/ssh/sshd_config'
     h.vm.provision :shell, inline: 'echo demo > /home/vagrant/.vault_pass.txt'
     h.vm.provision :shell, :inline => <<'EOF'
@@ -62,6 +70,12 @@ SSHEOF
 
 chown -R vagrant:vagrant /home/vagrant/.ssh/
 EOF
+
+    h.vm.provider "hyperv" do |vm|
+		vm.vmname = "control2"
+        vm.cpus = 2
+        vm.memory = 2048
+    end
   end
 
   config.vm.define "dc01" do |h|
@@ -77,8 +91,8 @@ EOF
     h.vm.box = "mwrock/Windows2012R2"
     h.vm.hostname = "dc01"
     # note this IP address is used in another script by domain members to set DNS: scripts\windows\domain\joindomain.ps1
-    h.vm.network "public_network", ip: "192.168.1.150", bridge: "em1"
-    h.vm.provision "shell",   run: "always",  inline: "route add 0.0.0.0 MASK 0.0.0.0  192.168.1.254 -p"
+    h.vm.network "public_network", #ip: "192.168.1.150"
+    # h.vm.provision "shell",   run: "always",  inline: "route add 0.0.0.0 MASK 0.0.0.0  192.168.1.254 -p"
     h.vm.guest = :windows
     h.vm.communicator = "winrm"
     h.vm.boot_timeout = 600
@@ -95,17 +109,17 @@ EOF
     h.vm.provision :reload 
     h.vm.provision "shell", path: "scripts/windows/ConfigureRemotingForAnsible.ps1", powershell_elevated_interactive: false 
 
-    h.vm.provider "virtualbox" do |vm|
-        vm.gui = false
+    h.vm.provider "hyperv" do |vm|
+		vm.vmname = "dc01"
         vm.cpus = 2
-        vm.memory = 2048
+        vm.memory = 4096
     end
   end
 
   config.vm.define "backup01" do |h|
     h.vm.box = "mwrock/Windows2016"
     h.vm.hostname = "backup01"
-    h.vm.network "public_network", bridge: "em1"
+    h.vm.network "public_network"
     h.vm.guest = :windows
     h.vm.communicator = "winrm"
     h.vm.boot_timeout = 600
@@ -121,8 +135,8 @@ EOF
     h.vm.provision "shell", path: "scripts/windows/ConfigureRemotingForAnsible.ps1", powershell_elevated_interactive: false 
     h.vm.provision "shell", path: "scripts/windows/ConfigBackupServer2016.cmd"
 
-    h.vm.provider "virtualbox" do |vm|
-        vm.gui = false
+    h.vm.provider "hyperv" do |vm|
+		vm.vmname = "backup01"
         vm.cpus = 2
         vm.memory = 4096
     end
@@ -132,13 +146,13 @@ EOF
   config.vm.define "backup02" do |h|
     h.vm.box = "opentable/win-2012-standard-amd64-nocm"
     h.vm.hostname = "backup02"
-    h.vm.network "public_network", bridge: "em1"
+    h.vm.network "public_network"
     h.vm.guest = :windows
     h.vm.communicator = "winrm"
     h.vm.boot_timeout = 600
     h.vm.graceful_halt_timeout = 600
 
-    h.vm.provider "virtualbox" do |vb|
+    h.vm.provider "hyperv" do |vb|
       file_to_disk = '/mnt/vms/large_disk.vdi'
       unless File.exists?(file_to_disk)
         vb.customize ['createhd', '--filename', file_to_disk, '--size', 500 * 1024]
@@ -156,8 +170,8 @@ EOF
     h.vm.provision "shell", path: "scripts/windows/ConfigureRemotingForAnsible.ps1", powershell_elevated_interactive: false 
     h.vm.provision "shell", path: "scripts/windows/ConfigBackupServer2012.cmd"
 
-    h.vm.provider "virtualbox" do |vm|
-        vm.gui = false
+    h.vm.provider "hyperv" do |vm|
+		vm.vmname = "backup02"
         vm.cpus = 2
         vm.memory = 4096
     end
@@ -166,7 +180,7 @@ EOF
   config.vm.define "app01" do |h|
     h.vm.box = "mwrock/Windows2012R2"
     h.vm.hostname = "app01"
-    h.vm.network "public_network", bridge: "em1"
+    h.vm.network "public_network"
     h.vm.guest = :windows
     h.vm.communicator = "winrm"
     h.vm.boot_timeout = 600
@@ -181,8 +195,8 @@ EOF
     h.vm.provision :reload 
     h.vm.provision "shell", path: "scripts/windows/ConfigureRemotingForAnsible.ps1", powershell_elevated_interactive: false 
 
-    h.vm.provider "virtualbox" do |vm|
-        vm.gui = false
+    h.vm.provider "hyperv" do |vm|
+		vm.vmname = "app01"
         vm.cpus = 2
         vm.memory = 2048
     end
@@ -191,7 +205,7 @@ EOF
   config.vm.define "config01" do |h|
     h.vm.box = "mwrock/Windows2012R2"
     h.vm.hostname = "config01"
-    h.vm.network "public_network", bridge: "em1"
+    h.vm.network "public_network"
     h.vm.guest = :windows
     h.vm.communicator = "winrm"
     h.vm.boot_timeout = 600
@@ -206,8 +220,8 @@ EOF
     h.vm.provision :reload 
     h.vm.provision "shell", path: "scripts/windows/ConfigureRemotingForAnsible.ps1", powershell_elevated_interactive: false 
 
-    h.vm.provider "virtualbox" do |vm|
-        vm.gui = false
+    h.vm.provider "hyperv" do |vm|
+		vm.vmname = "config01"
         vm.cpus = 2
         vm.memory = 2048
     end
@@ -216,7 +230,7 @@ EOF
   config.vm.define "db01" do |h|
     h.vm.box = "mwrock/Windows2012R2"
     h.vm.hostname = "db01"
-    h.vm.network "public_network", bridge: "em1"
+    h.vm.network "public_network"
     h.vm.guest = :windows
     h.vm.communicator = "winrm"
     h.vm.boot_timeout = 600
@@ -231,8 +245,8 @@ EOF
     h.vm.provision :reload 
     h.vm.provision "shell", path: "scripts/windows/ConfigureRemotingForAnsible.ps1", powershell_elevated_interactive: false 
     
-    h.vm.provider "virtualbox" do |vm|
-        vm.gui = false
+    h.vm.provider "hyperv" do |vm|
+		vm.vmname = "db01"
         vm.cpus = 2
         vm.memory = 2048
     end
