@@ -3,7 +3,7 @@ choco install vim -y
 choco install git -y
 
 choco install bginfo -y
-robocopy . C:\ProgramData\chocolatey\bin bginfo.bgi
+expand-archive \vagrant\scripts\windows\bginfo.zip C:\ProgramData\chocolatey\bin 
 New-PSDrive -PSProvider Registry -Name HKU -Root HKEY_USERS
 Set-ItemProperty "HKU:\.Default\Software\Microsoft\Windows\CurrentVersion\Run" -Name 'BGInfo' -Value "bginfo.exe C:\ProgramData\chocolatey\bin\bginfo.bgi /timer:0 /nolicprompt /silent"
 Set-ItemProperty "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run" -Name 'BGInfo' -Value "bginfo.exe C:\ProgramData\chocolatey\bin\bginfo.bgi /timer:0 /nolicprompt /silent"
