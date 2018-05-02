@@ -13,16 +13,17 @@
 Vagrant.configure(2) do |config|
 
   config.vm.box = "hashicorp/precise64"
+  #ths user creds in the next line will need to exist on the host this machine is running inside of, to create a share mapping between /vagrant on the guest to CWD on the host
   config.vm.synced_folder '.', '/vagrant', type: 'smb', smb_username:  "vagrant", smb_password: "vagrant"
   
   
   config.vm.define "control", primary: true do |h|
     h.vm.hostname =  "control"
     h.vm.network "public_network"
-    h.vm.provision :shell, inline: 'sudo sed \'s/PermitRootLogin without-password/PermitRootLogin yes/g\' /etc/ssh/sshd_config > /etc/ssh/sshd_config'
     h.vm.provision :shell, inline: 'echo demo > /home/vagrant/.vault_pass.txt'
     h.vm.provision "shell" do |provision|
       provision.path = "scripts/linux/provision_ansible.sh"
+	  provision.path = "scripts/linux/update_sshdconfig.sh"
     end 
     h.vm.provision :shell, :inline => <<'EOF'
 
@@ -50,11 +51,14 @@ EOF
   
 
   config.vm.define "control2", primary: true do |h|
-    h.vm.box = "hashicorp/precise64"
+    h.vm.box = "centos/7"
     h.vm.hostname =  "control2"
     h.vm.network "public_network"
-    h.vm.provision :shell, inline: 'sudo sed \'s/PermitRootLogin without-password/PermitRootLogin yes/g\' /etc/ssh/sshd_config > /etc/ssh/sshd_config'
     h.vm.provision :shell, inline: 'echo demo > /home/vagrant/.vault_pass.txt'
+	h.vm.provision "shell" do |provision|
+      provision.path = "scripts/linux/provision_ansible.sh"
+	  provision.path = "scripts/linux/update_sshdconfig.sh"
+    end 
     h.vm.provision :shell, :inline => <<'EOF'
 
         if [ ! -f "/home/vagrant/.ssh/id_rsa" ]; then
@@ -144,7 +148,7 @@ EOF
 
   
   config.vm.define "backup02" do |h|
-    h.vm.box = "opentable/win-2012-standard-amd64-nocm"
+    h.vm.box = "mwrock/Windows2012R2"
     h.vm.hostname = "backup02"
     h.vm.network "public_network"
     h.vm.guest = :windows
@@ -154,10 +158,6 @@ EOF
 
     h.vm.provider "hyperv" do |vb|
       file_to_disk = '/mnt/vms/large_disk.vdi'
-      unless File.exists?(file_to_disk)
-        vb.customize ['createhd', '--filename', file_to_disk, '--size', 500 * 1024]
-      end
-      vb.customize ['storageattach', :id, '--storagectl', 'IDE Controller', '--port', 0, '--device', 1, '--type', 'hdd', '--medium', file_to_disk]
    end
 
     h.vm.network :forwarded_port, guest: 5985, host: 5985, id: "winrm", auto_correct: true
@@ -249,6 +249,60 @@ EOF
 		vm.vmname = "db01"
         vm.cpus = 2
         vm.memory = 2048
+    end
+  end
+  
+  config.vm.define "vmhost01" do |h|
+    h.vm.box = "mwrock/Windows2016"
+    h.vm.hostname = "vmhost01"
+    h.vm.network "public_network"
+    h.vm.guest = :windows
+    h.vm.communicator = "winrm"
+    h.vm.boot_timeout = 600
+    h.vm.graceful_halt_timeout = 600
+
+    h.vm.network :forwarded_port, guest: 5985, host: 5985, id: "winrm", auto_correct: true
+    
+    h.vm.provision "shell", path: "scripts/windows/domain/joindomain.ps1", powershell_elevated_interactive: false 
+    h.vm.provision "shell", inline: "slmgr /rearm"
+    h.vm.provision :reload 
+    h.vm.provision "shell", path: "scripts/windows/install-general.ps1", powershell_elevated_interactive: false 
+    h.vm.provision :reload 
+    h.vm.provision "shell", path: "scripts/windows/ConfigureRemotingForAnsible.ps1", powershell_elevated_interactive: false 
+    h.vm.provision "shell", path: "scripts/windows/ConfigBackupServer2016.cmd"
+
+    h.vm.provider "hyperv" do |vm|
+		vm.vmname = "vmhost01"
+        vm.cpus = 4
+        vm.memory = 8192
+    end
+  end
+
+  
+  config.vm.define "vmhost02" do |h|
+    h.vm.box = "mwrock/Windows2012R2"
+    h.vm.hostname = "vmhost02"
+    h.vm.network "public_network"
+    h.vm.guest = :windows
+    h.vm.communicator = "winrm"
+    h.vm.boot_timeout = 600
+    h.vm.graceful_halt_timeout = 600
+
+
+    h.vm.network :forwarded_port, guest: 5985, host: 5985, id: "winrm", auto_correct: true
+    h.vm.network :forwarded_port, guest: 3389, host: 3389, id: "rdp", auto_correct: true 
+    h.vm.provision "shell", path: "scripts/windows/domain/joindomain.ps1", powershell_elevated_interactive: false 
+    h.vm.provision "shell", inline: "slmgr /rearm"
+    h.vm.provision :reload 
+    h.vm.provision "shell", path: "scripts/windows/install-general.ps1", powershell_elevated_interactive: false 
+    h.vm.provision :reload 
+    h.vm.provision "shell", path: "scripts/windows/ConfigureRemotingForAnsible.ps1", powershell_elevated_interactive: false 
+    h.vm.provision "shell", path: "scripts/windows/ConfigBackupServer2012.cmd"
+
+    h.vm.provider "hyperv" do |vm|
+		vm.vmname = "vmhost02"
+        vm.cpus = 4
+        vm.memory = 8192
     end
   end
 end
