@@ -1,0 +1,1 @@
+install-windowsfeature hyper-v -IncludeManagementTools

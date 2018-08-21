@@ -120,17 +120,17 @@ EOF
     end
   end
 
-  config.vm.define "backup01" do |h|
-    h.vm.box = "mwrock/Windows2016"
+  config.vm.define "mabs01" do |h|
+    h.vm.box = "jminck/server2016rtm"
     h.vm.hostname = "backup01"
-    h.vm.network "public_network"
+    h.vm.network "public_network", bridge: "External"
     h.vm.guest = :windows
     h.vm.communicator = "winrm"
     h.vm.boot_timeout = 600
     h.vm.graceful_halt_timeout = 600
 
     h.vm.network :forwarded_port, guest: 5985, host: 5985, id: "winrm", auto_correct: true
-    
+    h.vm.synced_folder '.', '/vagrant', type: 'smb' , smb_username: "vagrant", smb_password: "vagrant"
     h.vm.provision "shell", path: "scripts/windows/domain/joindomain.ps1", powershell_elevated_interactive: false 
     h.vm.provision "shell", inline: "slmgr /rearm"
     h.vm.provision :reload 
@@ -140,7 +140,7 @@ EOF
     h.vm.provision "shell", path: "scripts/windows/ConfigBackupServer2016.cmd"
 
     h.vm.provider "hyperv" do |vm|
-		vm.vmname = "backup01"
+		vm.vmname = "mabs01"
         vm.cpus = 2
         vm.memory = 4096
     end
@@ -262,14 +262,13 @@ EOF
     h.vm.graceful_halt_timeout = 600
 
     h.vm.network :forwarded_port, guest: 5985, host: 5985, id: "winrm", auto_correct: true
-    
+	h.vm.provision "shell", path: "scripts/windows/installChocolatey.cmd"    
     h.vm.provision "shell", path: "scripts/windows/domain/joindomain.ps1", powershell_elevated_interactive: false 
     h.vm.provision "shell", inline: "slmgr /rearm"
     h.vm.provision :reload 
     h.vm.provision "shell", path: "scripts/windows/install-general.ps1", powershell_elevated_interactive: false 
     h.vm.provision :reload 
     h.vm.provision "shell", path: "scripts/windows/ConfigureRemotingForAnsible.ps1", powershell_elevated_interactive: false 
-    h.vm.provision "shell", path: "scripts/windows/ConfigBackupServer2016.cmd"
 
     h.vm.provider "hyperv" do |vm|
 		vm.vmname = "vmhost01"
@@ -280,7 +279,7 @@ EOF
 
   
   config.vm.define "vmhost02" do |h|
-    h.vm.box = "mwrock/Windows2012R2"
+    h.vm.box = "2016rtm"
     h.vm.hostname = "vmhost02"
     h.vm.network "public_network"
     h.vm.guest = :windows
@@ -291,13 +290,14 @@ EOF
 
     h.vm.network :forwarded_port, guest: 5985, host: 5985, id: "winrm", auto_correct: true
     h.vm.network :forwarded_port, guest: 3389, host: 3389, id: "rdp", auto_correct: true 
+	h.vm.provision "shell", path: "scripts/windows/installChocolatey.cmd"
     h.vm.provision "shell", path: "scripts/windows/domain/joindomain.ps1", powershell_elevated_interactive: false 
     h.vm.provision "shell", inline: "slmgr /rearm"
     h.vm.provision :reload 
     h.vm.provision "shell", path: "scripts/windows/install-general.ps1", powershell_elevated_interactive: false 
     h.vm.provision :reload 
     h.vm.provision "shell", path: "scripts/windows/ConfigureRemotingForAnsible.ps1", powershell_elevated_interactive: false 
-    h.vm.provision "shell", path: "scripts/windows/ConfigBackupServer2012.cmd"
+
 
     h.vm.provider "hyperv" do |vm|
 		vm.vmname = "vmhost02"
@@ -305,5 +305,35 @@ EOF
         vm.memory = 8192
     end
   end
+  
+    config.vm.define "inmage01" do |h|
+    h.vm.box = "mwrock/Windows2012R2"
+    h.vm.hostname = "inmage01"
+    h.vm.network "public_network"
+    h.vm.guest = :windows
+    h.vm.communicator = "winrm"
+    h.vm.boot_timeout = 600
+    h.vm.graceful_halt_timeout = 600
+    h.vm.synced_folder '.', '/vagrant', type: 'smb', smb_username:  "vmhost\vagrant", smb_password: "vagrant"
+
+
+    h.vm.network :forwarded_port, guest: 5985, host: 5985, id: "winrm", auto_correct: true
+    h.vm.network :forwarded_port, guest: 3389, host: 3389, id: "rdp", auto_correct: true 
+	h.vm.provision "shell", path: "scripts/windows/installChocolatey.cmd"
+    h.vm.provision "shell", path: "scripts/windows/domain/joindomain.ps1", powershell_elevated_interactive: false 
+    h.vm.provision "shell", inline: "slmgr /rearm"
+    h.vm.provision :reload 
+    h.vm.provision "shell", path: "scripts/windows/install-general.ps1", powershell_elevated_interactive: false 
+    h.vm.provision :reload 
+    h.vm.provision "shell", path: "scripts/windows/ConfigureRemotingForAnsible.ps1", powershell_elevated_interactive: false 
+
+
+    h.vm.provider "hyperv" do |vm|
+		vm.vmname = "inmage01"
+        vm.cpus = 2
+        vm.memory = 4096
+    end
+  end
+  
 end
 
