@@ -1,0 +1,23 @@
+DC can't talk over WinRM after dcpromo - need to use an image that allows 
+CWD isn't correct for bginfo.bgi copy
+wmi isn't enabled on Windows recovery targets
+bginfo.big was corrupted
+linux targets need to allow root ssh access
+backup server need to have its steps run (in CMD file - install hyper-v, etc.)
+backup server is 2012 RTM to allow installation of Hyper-v - but it doesn't have choco installed, so packages using it don't get installed
+backup server missing hyper-v powershell
+
+MABS agent firewall ports opened
+New-NetFirewallRule -DisplayName "DCOM" -Direction Inbound -LocalPort 135,1024-65535 -Protocol TCP -Action Allow
+
+#sed sample
+# sudo sed -i 's/AutoUpdate.Enabled=n/AutoUpdate.Enabled=y/g' /etc/waagent.conf
+
+
+#random notes about how to set a custom script extension - work in progress
+
+$vmName = "db01-test"
+$rgName = "jminck-vault-rg"
+Set-AzureRmVMCustomScriptExtension -ResourceGroupName $rgName -Location "West US" -VMName $vmName -Name "ContosoTest" -TypeHandlerVersion "1.1" -StorageAccountName "jminckasr" -FileName "ipconfig.ps1" -ContainerName "files"
+
+#test line 
